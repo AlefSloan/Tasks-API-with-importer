@@ -34,7 +34,7 @@ export class Database {
     this.#persist();
   }
 
-  update() {
+  update(table, id, data) {
 
   }
 
@@ -43,16 +43,21 @@ export class Database {
       return item.id === id
     })
 
-    console.log(task);
-
     if (task > -1) {
       this.#database[table].splice(task, 1)
       this.#persist()
     }
   }
 
-  complete_task() {
+  complete_task(table, id) {
+    const task = this.#database[table].findIndex(item => {
+      return item.id === id
+    })
 
+    if (task > -1 && this.#database[table][task].completed_at === null) {
+      this.#database[table][task].completed_at = new Date();
+    } else if (task > -1 && this.#database[table][task].completed_at !== null) {
+      this.#database[table][task].completed_at = null;
+    }
   }
-
 }
