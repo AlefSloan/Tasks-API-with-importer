@@ -35,7 +35,18 @@ export class Database {
   }
 
   update(table, id, data) {
+    const task = this.#database[table].findIndex((item) => {
+      return item.id === id;
+    });
 
+    if (task > -1) {
+      Object.assign(this.#database[table][task], {
+        ...data,
+        updated_at: new Date(),
+      });
+      
+      this.#persist();
+    }
   }
 
   delete(table, id) {
@@ -55,9 +66,17 @@ export class Database {
     })
 
     if (task > -1 && this.#database[table][task].completed_at === null) {
-      this.#database[table][task].completed_at = new Date();
+      Object.assign(this.#database[table][task], {
+        completed_at: new Date(),
+        updated_at: new Date(),
+      });
     } else if (task > -1 && this.#database[table][task].completed_at !== null) {
-      this.#database[table][task].completed_at = null;
+      Object.assign(this.#database[table][task], {
+        completed_at: null,
+        updated_at: new Date(),
+      });
     }
+
+    this.#persist();
   }
 }
