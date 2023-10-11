@@ -24,11 +24,11 @@ export class Database {
     return data;
   }
 
-  insert(table, data) {
+  insert(table, data) {   
     if (this.#database[table]) {
       this.#database[table].push(data)
     } else {
-      this.#database[table] = data
+      this.#database[table] = [data]
     }
 
     this.#persist();
@@ -38,8 +38,17 @@ export class Database {
 
   }
 
-  delete() {
+  delete(table, id) {
+    const task = this.#database[table].findIndex(item => {
+      return item.id === id
+    })
 
+    console.log(task);
+
+    if (task > -1) {
+      this.#database[table].splice(task, 1)
+      this.#persist()
+    }
   }
 
   complete_task() {
