@@ -18,9 +18,17 @@ export class Database {
     return fs.writeFile(databasePath, JSON.stringify(this.#database))
   }
   
-  select(table) {
-    const data = this.#database[table] ?? []
+  select(table, search) {
+    let data = this.#database[table] ?? []
     
+    if (search) {
+      data = data.filter((item) => {
+        return Object.entries(search).some(([key, value]) => {
+          return item[key].toLowerCase().includes(value.toLowerCase());
+        });
+      });
+    }
+
     return data;
   }
 
@@ -44,7 +52,7 @@ export class Database {
         ...data,
         updated_at: new Date(),
       });
-      
+
       this.#persist();
     }
   }
