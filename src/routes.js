@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import { Database } from "./database.js";
 import { buildRoutePath } from "./utils/buildRoutePath.js";
+import { validator } from './middlewares/validator.js';
 
 const database = new Database();
 
@@ -25,6 +26,12 @@ export const routes = [
     handler: (req, res) => {
       const { title, description } = req.body;
 
+      const isValid = validator(req, res);
+
+      if (!isValid) {
+        return res.writeHead(400).end('Title and Description required')
+      }
+
       const newTask = {
         id: randomUUID(),
         title,
@@ -46,6 +53,20 @@ export const routes = [
       const { id } = req.params;
       const data = req.body;
 
+      const isValid = validator(req, res);
+
+      if (!isValid) {
+        return res.writeHead(400).end('Title or Description required');
+      }
+
+      const task = database.select('tasks').find((task) => {
+        return task.id === id
+      })
+
+      if (!task) {
+        res.writeHead(404).end('Error - Task not found')
+      }
+      
       database.update('tasks', id, { ...data });
 
       res.writeHead(204).end();
@@ -57,6 +78,14 @@ export const routes = [
     handler: (req, res) => {
       const { id } = req.params
       
+      const task = database.select('tasks').find((task) => {
+        return task.id === id;
+      });
+
+      if (!task) {
+        res.writeHead(404).end('Error - Task not found');
+      }
+
       database.complete_task('tasks', id);
       
       res.writeHead(204).end();
@@ -67,6 +96,14 @@ export const routes = [
     path: buildRoutePath('/tasks/:id'),
     handler: (req, res) => {
       const { id } = req.params;
+
+      const task = database.select('tasks').find((task) => {
+        return task.id === id;
+      });
+
+      if (!task) {
+        res.writeHead(404).end('Error - Task not found');
+      }
 
       database.delete('tasks', id);
       
